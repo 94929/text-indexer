@@ -23,8 +23,8 @@ public class Indexer {
 
     // concerns creation only.
     public static void main(String[] args) {
-        String indexPath = "C:\\lucene_test\\index";    // toSaved
-        String docsPath = "C:\\lucene_test\\data";      // toGetData
+        String indexPath = "./test/idx";        // toSaved
+        String docsPath = "./test/doc";         // toGetData
 
         final Path docDir = Paths.get(docsPath);        // getPath of dataDir
         if (!Files.isReadable(docDir))                  // error handling
