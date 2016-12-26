@@ -13,7 +13,9 @@
           <root url="jar://$MODULE_DIR$/../../Library/lucene-6.3.0/core/lucene-core-6.3.0.jar!/" />
         </CLASSES>
         <JAVADOC />
-        <SOURCES />
+        <SOURCES>
+          <root url="jar://$USER_HOME$/.ideaLibSources/lucene-core-6.3.0-sources.jar!/" />
+        </SOURCES>
       </library>
     </orderEntry>
   </component>
