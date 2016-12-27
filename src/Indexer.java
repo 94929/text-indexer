@@ -14,52 +14,57 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by jsh3571 on 26/12/2016.
  */
 
 public class Indexer {
+    private Path idxPath;           // index folder path
+    private Path docPath;           // docs folder path
+    private Date start;             // need this to get time.
 
-    // concerns creation only.
-    public static void main(String[] args) {
-        String indexPath = "./test/idx";        // toSaved
-        String docsPath = "./test/doc";         // toGetData
-
-        final Path docDir = Paths.get(docsPath);        // getPath of dataDir
-        if (!Files.isReadable(docDir))                  // error handling
+    public Indexer(String idxPath, String docPath) {
+        this.idxPath = Paths.get(idxPath);
+        this.docPath = Paths.get(docPath);
+        if (!Files.isReadable(this.docPath)) {
+            System.out.println("'docPath' is not readable.");
             System.exit(1);
+        }
 
-        Date start = new Date();    // need this to get time taken.
+        start = new Date();
+
         try {
-            System.out.println("Indexing to directory '" + indexPath + "'...");
-            // param 1
-            Directory dir = FSDirectory.open(Paths.get(indexPath));
+            System.out.println("Indexing to directory '" +idxPath+ "'...");
 
-            // param 2
+            // PARAM 1 of writer, Open idxPath as Directory
+            Directory dir = FSDirectory.open(this.idxPath);
+
+            // param 2 of writer,
             Analyzer analyzer = new StandardAnalyzer();
             IndexWriterConfig config = new IndexWriterConfig(analyzer);
             config.setOpenMode(IndexWriterConfig.OpenMode.CREATE);
 
-            // set up the writer which actually writes index using from docDir(::Path).
+            // IndexWriter writer = new (PARAM1,2)
             IndexWriter writer = new IndexWriter(dir, config);
 
-            // main algo
-            indexDocs(writer, docDir);
+            indexDocs(writer);
 
-            System.out.println((new Date().getTime() - start.getTime()) +
-                    " total milliseconds");
+            // Print total time taken for indexing.
+            printTimeTaken();
+
+            // Closing writer before reader reads from searcher.
             writer.close();
-        } catch (Exception e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     /* Iterate through the paths(ie. the files) */
-    public static void indexDocs(final IndexWriter writer, Path path)
-            throws IOException {
-        if (Files.isDirectory(path)) {
-            Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
+    private void indexDocs(final IndexWriter writer) throws IOException {
+        if (Files.isDirectory(docPath)) {
+            Files.walkFileTree(docPath, new SimpleFileVisitor<Path>() {
                 @Override
                 public FileVisitResult visitFile(
                         Path file,
@@ -71,10 +76,8 @@ public class Indexer {
         }
     }
 
-    public static void indexDoc(
-            IndexWriter writer,
-            Path file,
-            long lastModified) throws IOException {
+    private void indexDoc(IndexWriter writer, Path file, long lastModified)
+            throws IOException {
 
         try (InputStream stream = Files.newInputStream(file)) {
             Document doc = new Document();
@@ -88,8 +91,14 @@ public class Indexer {
 
             System.out.println("adding"+file);
             writer.addDocument(doc);
-        } catch (Exception e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private void printTimeTaken() {
+        System.out.println("Took total "+ TimeUnit.MILLISECONDS.toSeconds(
+                new Date().getTime()-start.getTime())+
+                " seconds.");
     }
 }

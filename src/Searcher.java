@@ -19,6 +19,7 @@ import java.nio.file.Paths;
  */
 
 public class Searcher {
+
     public static void main(String[] args) throws Exception {
         String indexPath = "./test/idx";    // where the index is
         String field = "contents";          // find qstring from field
