@@ -22,7 +22,7 @@ public class Searcher {
     public static void main(String[] args) throws Exception {
         String indexPath = "./test/idx";    // where the index is
         String field = "contents";          // find qstring from field
-        String queryString = "tar";         // thing that were looking 4
+        String queryString = "raincoat";         // thing that were looking 4
         int hitPerPage = 10;
 
         // IndexReader 생성(IndexSearcher에 넘겨주기 위해)

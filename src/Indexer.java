@@ -49,6 +49,7 @@ public class Indexer {
 
             System.out.println((new Date().getTime() - start.getTime()) +
                     " total milliseconds");
+            writer.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
