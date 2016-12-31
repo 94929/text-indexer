@@ -4,8 +4,12 @@
 
 public class Main {
     public static void main(String[] args) {
+        // indexing performed here
         String idxPath = "./test/idx";
         String docPath = "./test/doc";
         Indexer indexer = new Indexer(idxPath, docPath);
+
+        // searching performed here
+
     }
 }

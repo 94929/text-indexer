@@ -21,9 +21,11 @@ import java.util.concurrent.TimeUnit;
  */
 
 public class Indexer {
-    private Path idxPath;           // index folder path
-    private Path docPath;           // docs folder path
-    private Date start;             // need this to get time.
+    private final Path idxPath;           // index folder path
+    private final Path docPath;           // docs folder path
+    private Date start;                   // need this to get time.
+
+    private IndexWriter writer;
 
     public Indexer(String idxPath, String docPath) {
         this.idxPath = Paths.get(idxPath);
@@ -38,20 +40,10 @@ public class Indexer {
         try {
             System.out.println("Indexing to directory '" +idxPath+ "'...");
 
-            // PARAM 1 of writer, Open idxPath as Directory
-            Directory dir = FSDirectory.open(this.idxPath);
+            initWriter();
+            indexDocs(writer, this.docPath);
 
-            // param 2 of writer,
-            Analyzer analyzer = new StandardAnalyzer();
-            IndexWriterConfig config = new IndexWriterConfig(analyzer);
-            config.setOpenMode(IndexWriterConfig.OpenMode.CREATE);
-
-            // IndexWriter writer = new (PARAM1,2)
-            IndexWriter writer = new IndexWriter(dir, config);
-
-            indexDocs(writer);
-
-            // Print total time taken for indexing.
+            // Printing total time taken for indexing.
             printTimeTaken();
 
             // Closing writer before reader reads from searcher.
@@ -61,10 +53,26 @@ public class Indexer {
         }
     }
 
+    private void initWriter() throws IOException {
+        // PARAM 1 of writer, Open idxPath as Directory
+        Directory directory = FSDirectory.open(idxPath);
+
+        // param 2 of writer,
+        Analyzer analyzer = new StandardAnalyzer();
+        IndexWriterConfig config = new IndexWriterConfig(analyzer);
+
+        config.setOpenMode(IndexWriterConfig.OpenMode.CREATE);
+
+        // IndexWriter writer = new (PARAM1,2)
+        writer = new IndexWriter(directory, config);
+        // saying that this writer will write into the directory with the config
+    }
+
     /* Iterate through the paths(ie. the files) */
-    private void indexDocs(final IndexWriter writer) throws IOException {
-        if (Files.isDirectory(docPath)) {
-            Files.walkFileTree(docPath, new SimpleFileVisitor<Path>() {
+    private void indexDocs(final IndexWriter writer, final Path path)
+            throws IOException {
+        if (Files.isDirectory(path)) {
+            Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
                 @Override
                 public FileVisitResult visitFile(
                         Path file,
@@ -89,7 +97,7 @@ public class Indexer {
                             new InputStreamReader(
                                     stream, StandardCharsets.UTF_8))));
 
-            System.out.println("adding"+file);
+            System.out.println("adding '"+file+"'");
             writer.addDocument(doc);
         } catch (IOException e) {
             e.printStackTrace();

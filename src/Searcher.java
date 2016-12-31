@@ -20,26 +20,23 @@ import java.nio.file.Paths;
 
 public class Searcher {
 
-    public static void main(String[] args) throws Exception {
-        String indexPath = "./test/idx";    // where the index is
-        String field = "contents";          // find qstring from field
-        String queryString = "raincoat";         // thing that were looking 4
-        int hitPerPage = 10;
-
-        // IndexReader 생성(IndexSearcher에 넘겨주기 위해)
+    public Searcher(String indexPath, String queryString) throws Exception {
+        // Create IndexSearcher
         Path p = Paths.get(indexPath);
         Directory d = FSDirectory.open(p);
         IndexReader reader = DirectoryReader.open(d);
         IndexSearcher searcher = new IndexSearcher(reader);
 
-        // Analyser 생성
+        // Create Analyser
         Analyzer analyzer = new StandardAnalyzer();
 
-        // Query 생성 from QueryParser
-        QueryParser queryParser = new QueryParser(field, analyzer);
+        // Create Query from QueryParser
+        QueryParser queryParser = new QueryParser("contents", analyzer);
         Query query = queryParser.parse(queryString);
 
-        // search performed here
+        int hitPerPage = 10;
+
+        // Actual search is performed here
         TopDocs results = searcher.search(query, 5*hitPerPage);
         ScoreDoc[] hits = results.scoreDocs;
 
@@ -48,9 +45,10 @@ public class Searcher {
 
         for (int i=0; i<numOfHits; i++) {
             Document doc = searcher.doc(hits[i].doc);
-            String path = doc.get(/* field */ "path");
+            String path = doc.get("path");
             System.out.println(""+path);
         }
+
         reader.close();
     }
 }
